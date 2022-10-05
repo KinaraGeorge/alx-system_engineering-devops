@@ -1,2 +1,2 @@
 # alx-system_engineering-devops
-Day 3 of coding
+its good to code
