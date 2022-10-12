@@ -1,4 +1,3 @@
-<h3>Shell Permissions</h3>
 <ol>
 <li>Script that switches the current user to the use.</li>
 <li>Prints all the groups the current user is part of.</li>
