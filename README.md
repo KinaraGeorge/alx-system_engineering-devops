@@ -1,3 +1,3 @@
-# ALX System Engineering Devops
+# ALX System Engineering Devops 
 
-1. First Command Scrips
+1.Command line basics using Ubuntu 20.04
