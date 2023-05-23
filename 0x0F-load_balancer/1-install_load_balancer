@@ -6,19 +6,20 @@ sudo apt-get -y install haproxy
 
 # Configure HAProxy
 sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.original
-echo "ENABLED=1" | sudo tee -a /etc/default/haproxy > /dev/null
-sudo tee -a /etc/haproxy/haproxy.cfg > /dev/null <<EOT
 
-listen appname
-    bind 0.0.0.0:80
-    mode http
-    stats enable
-    balance roundrobin
-    option httpclose
-    option forwardfor
-    server 166184-web-01 54.237.53.189:80 check
-    server 166184-web-02 3.84.255.31:80 check
+# Update HAProxy configuration
+cat <<EOT | sudo tee /etc/haproxy/haproxy.cfg > /dev/null
+frontend http-in
+    bind *:80
+    default_backend app-servers
+
+backend app-servers
+    balance roundrobin
+    server 166184-web-01 54.237.53.189:80
+    server 166184-web-02 3.84.255.31:80
 EOT
 
 # Start HAProxy service
 sudo service haproxy start
+
+
