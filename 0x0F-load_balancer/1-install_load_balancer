@@ -1,33 +1,18 @@
 #!/usr/bin/env bash
-# Bash script that configures a new Ubuntu machine to configure HAproxy on the lb-01 server.
+# Installs and configures HAproxy on server
 
-# install HAproxy
-sudo apt-get update
-
-sudo apt-get install --no-install-recommends software-properties-common -y
-
-sudo add-apt-repository ppa:vbernat/haproxy-2.6 -y
-
-sudo apt-get install haproxy=2.6.\*
-
-# Configure HAproxy so that it send traffic to web-01 and web-02.
-
-sudo tee /etc/haproxy/haproxy.cfg > /dev/null <<EOF
-frontend http_front
+sudo apt update -y
+sudo apt install haproxy -y
+echo "
+frontend lb
     bind *:80
-    default_backend http_rear
-
-backend http_rear
+    mode http
+    default_backend nginx-servers
+    
+backend nginx-servers
+    mode http
     balance roundrobin
-    server 166184-web-01 54.237.53.189:80 check
-    server 166184-web-02 3.84.255.31:80 check
-
-ENABLED=1
-EOF
-
-# Start HAproxy service
-sudo systemctl start haproxy
-
-sudo systemctl enable haproxy
-
-sudo /etc/init.d/haproxy reload
+    server web-01 54.237.53.189:80 check
+    server web-02 3.84.255.31:80 check
+" >> /etc/haproxy/haproxy.cfg
+sudo service haproxy restart
