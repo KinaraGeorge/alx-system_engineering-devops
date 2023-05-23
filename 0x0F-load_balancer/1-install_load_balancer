@@ -1,25 +1,33 @@
 #!/usr/bin/env bash
-# Install haproxy and configure the load balancer
+# Bash script that configures a new Ubuntu machine to configure HAproxy on the lb-01 server.
 
-sudo apt-get -y update
-sudo apt-get -y install haproxy
+# install HAproxy
+sudo apt-get update
 
-# Configure HAProxy
-sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.original
+sudo apt-get install --no-install-recommends software-properties-common -y
 
-# Update HAProxy configuration
-cat <<EOT | sudo tee /etc/haproxy/haproxy.cfg > /dev/null
-frontend http-in
-    bind *:80
-    default_backend app-servers
+sudo add-apt-repository ppa:vbernat/haproxy-2.6 -y
 
-backend app-servers
-    balance roundrobin
-    server 166184-web-01 54.237.53.189:80
-    server 166184-web-02 3.84.255.31:80
-EOT
+sudo apt-get install haproxy=2.6.\*
 
-# Start HAProxy service
-sudo service haproxy start
+# Configure HAproxy so that it send traffic to web-01 and web-02.
 
+sudo tee /etc/haproxy/haproxy.cfg > /dev/null <<EOF
+frontend http_front
+    bind *:80
+    default_backend http_rear
 
+backend http_rear
+    balance roundrobin
+    server 166184-web-01 54.237.53.189:80 check
+    server 166184-web-02 3.84.255.31:80 check
+
+ENABLED=1
+EOF
+
+# Start HAproxy service
+sudo systemctl start haproxy
+
+sudo systemctl enable haproxy
+
+sudo /etc/init.d/haproxy reload
