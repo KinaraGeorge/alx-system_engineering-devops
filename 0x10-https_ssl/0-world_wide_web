@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Script that displays information about subdomains.
+
+function get_dns_info() {
+        local domain="$1"
+        local subdomain="$2"
+        local dig_output
+
+        if [ -n "$subdomain" ]; then
+                dig_output=$(dig "$subdomain.$domain" +short)
+        else
+                dig_output=$(dig "www.$domain" +short)
+                dig_output+="\n$(dig "lb-01.$domain" +short)"
+                dig_output+="\n$(dig "web-01.$domain" +short)"
+                dig_output+="\n$(dig "web-02.$domain" +short)"
+        fi
+
+        if [ -z "$dig_output" ]; then
+                echo "Unable to retrieve DNS information for $subdomain.$domain"
+                return 1
+        fi
+
+        echo "$dig_output" | awk -v sd="$subdomain" '{print "The subdomain " sd " is a " "A" " record and points to " $1}'
+}
+
+if [ -z "$1" ]; then
+        echo "Usage: $0 <domain name> [subdomain name]"
+        exit 1
+fi
+
+if [ -n "$2" ]; then
+        get_dns_info "$1" "$2"
+else
+        get_dns_info "$1" "www"
+        get_dns_info "$1" "lb-01"
+        get_dns_info "$1" "web-01"
+        get_dns_info "$1" "web-02"
+fi
