@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Bash script to check user other than
-sudo -u "$1" whoami
